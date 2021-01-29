@@ -1,3 +1,26 @@
+/*
+Copyright (c) 2021 Christian Döring
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
 #ifndef DLIST_H
 #define DLIST_H
 
@@ -15,10 +38,10 @@
  * container of node can be optained with dlist_container(_node, _type, _member)
  */
 #define DLIST_FOR_EACH(_dlist_ptr, _node) for(struct dlist_node *(_node) = (_dlist_ptr)->head; (_node) != NULL; (_node) = (_node)->next)
-                          
+
 
 /*
- * node struct of dlist. listed struct should have it as member 
+ * node struct of dlist. listed struct should have it as member
 */
 struct dlist_node{
   struct dlist_node *next, *prev;
