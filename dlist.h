@@ -243,10 +243,10 @@ SOFTWARE.
  * @param _list list whos elements should be poped
  * @param _member member name of the node in that struct
  */
-#define DLIST_POPEACH_CONT(_iter, _list, _member)\
-        for((_iter) = DLIST_CONT(dlist_pop((_list)->next), typeof(*(_iter)), _member);\
+#define DLIST_POPEACH_CONT(_type, _iter, _list, _member)\
+        for(_type *(_iter) = DLIST_CONT(dlist_pop((_list)->next), _type, _member);\
         &(_iter)->_member != (_list);\
-        (_iter) = DLIST_CONT(dlist_pop((_list)->next), typeof(*(_iter)), _member))
+        (_iter) = DLIST_CONT(dlist_pop((_list)->next), _type, _member))
 
 /*
  * DLIST_POPEACH_CONT_EXT same as DLIST_POPEACH_CONT but with external definition of _iter
@@ -255,10 +255,10 @@ SOFTWARE.
  * @param _list list whos elements should be poped
  * @param _member member name of the node in that struct
  */
-#define DLIST_POPEACH_CONT_EXT(_type, _iter, _list, _member)\
-        for(_type *(_iter) = DLIST_CONT(dlist_pop((_list)->next), _type, _member);\
+#define DLIST_POPEACH_CONT_EXT(_iter, _list, _member)\
+        for((_iter) = DLIST_CONT(dlist_pop((_list)->next), typeof(*(_iter)), _member);\
         &(_iter)->_member != (_list);\
-        (_iter) = DLIST_CONT(dlist_pop((_list)->next), _type, _member))
+        (_iter) = DLIST_CONT(dlist_pop((_list)->next), typeof(*(_iter)), _member))
 
 /*
  * DLIST_POPEACH_REV_CONT pops every element from the list where _iter is the containing struct (can be used to free list elements)
