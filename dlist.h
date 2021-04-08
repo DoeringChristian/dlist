@@ -478,7 +478,7 @@ static inline struct dlist *dlist_insert_before(struct dlist *dst, struct dlist 
  * @param self pointer to list
  * @return length of list returns 0 if empty
  */
-uint dlist_length(struct dlist *self){
+static inline uint dlist_length(struct dlist *self){
     uint i = 0;
     DLIST_FOREACH(n, self) i++;
     return i;
@@ -490,7 +490,7 @@ uint dlist_length(struct dlist *self){
  * @param self pointer to list that should be reversed
  * @return void
  */
-void dlist_reverse(struct dlist *self){
+static inline void dlist_reverse(struct dlist *self){
     struct dlist *tmp = self->next;
     self->next = self->prev;
     self->prev = tmp;
