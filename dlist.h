@@ -450,11 +450,14 @@ static inline struct dlist *dlist_push_front(struct dlist *self, struct dlist *s
  * @return first element that has been inserted, if src is empty dst
  */
 static inline struct dlist *dlist_insert_after(struct dlist *dst, struct dlist *src){
-    struct dlist *tmp = dst;
-    DLIST_POPEACH_REV_EXT(tmp, src){
-        dlist_push_after(dst, tmp);
+    if(dst != NULL && src != NULL){
+        dst->next->prev = src->prev;
+        src->prev->next = dst->next;
+        src->next->prev = dst;
+        dst->next = src->next;
+        src->next = src->prev = src;
     }
-    return tmp;
+    return dst->next;
 }
 
 /*
@@ -465,11 +468,14 @@ static inline struct dlist *dlist_insert_after(struct dlist *dst, struct dlist *
  * @retrun returns last inserted element if src is empty returns dst
  */
 static inline struct dlist *dlist_insert_before(struct dlist *dst, struct dlist *src){
-    struct dlist *tmp = dst;
-    DLIST_POPEACH_EXT(tmp, src){
-        dlist_push_before(dst, tmp);
+    if(dst != NULL && src != NULL){
+        dst->prev->next = src->next;
+        src->next->prev = dst->prev;
+        src->prev->next = dst;
+        dst->prev = src->prev;
+        src->next = src->prev = src;
     }
-    return tmp;
+    return dst->next;
 }
 
 /*
