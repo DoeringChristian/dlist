@@ -443,14 +443,14 @@ static inline struct dlist *dlist_push_front(struct dlist *self, struct dlist *s
 }
 
 /*
- * dlist_insert_after inserts the nodes of src after the dst node
+ * dlist_splice_after inserts the nodes of src after the dst node
  *
  * @param dst node after which to insert the nodes of src
  * @param src list, whichs nodes are to be inserted after dst
  * @return first element that has been inserted, if src is empty dst
  */
-static inline struct dlist *dlist_insert_after(struct dlist *dst, struct dlist *src){
-    if(dst != NULL && src != NULL){
+static inline struct dlist *dlist_splice_after(struct dlist *dst, struct dlist *src){
+    if(dst != NULL && src != NULL && src->next != src){
         dst->next->prev = src->prev;
         src->prev->next = dst->next;
         src->next->prev = dst;
@@ -461,14 +461,14 @@ static inline struct dlist *dlist_insert_after(struct dlist *dst, struct dlist *
 }
 
 /*
- * dlist_insert_after inserts the nodes of src before the dst node
+ * dlist_splice_before inserts the nodes of src before the dst node
  *
  * @param dst node after which to insert the nodes of src
  * @param src list, which nodes are to be inserted after dst
  * @retrun returns last inserted element if src is empty returns dst
  */
-static inline struct dlist *dlist_insert_before(struct dlist *dst, struct dlist *src){
-    if(dst != NULL && src != NULL){
+static inline struct dlist *dlist_splice_before(struct dlist *dst, struct dlist *src){
+    if(dst != NULL && src != NULL && src->next != src){
         dst->prev->next = src->next;
         src->next->prev = dst->prev;
         src->prev->next = dst;
