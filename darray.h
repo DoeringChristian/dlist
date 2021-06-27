@@ -8,8 +8,16 @@
 
 typedef unsigned int uint;
 
-#define DARRAY_APPEND(_dst_p, _src_p, _num) darray_append(_dst_p, _src_p, _num, sizeof(*_src_p))
-#define DARRAY_INSERT(_dst_p, _src_p, _num, _index) darray_insert(_dst_p, _src_p, _num, _index)
+#define DARRAY_APPEND(_arr_p, _elem_p) darray_append((_arr_p), (_elem_p), sizeof(*(_elem_p)))
+
+#define DARRAY_INSERT(_arr_p, _elem_p, _index) darray_insert((_arr_p), (_elem_p), sizeof(*(_elem_p)), (_index)*(sizeof(*(_elem_p))))
+
+#define DARRAY_AT(_arr_p, _type, _index) (_type *)(&(_arr_p)->arr[(_index)*sizeof(_type)])
+
+#define DARRAY_REMOVE(_arr_p, _type, _index) darray_remove(_arr_p, (sizeof(_type)), (_index)*(sizeof(_type)))
+
+#define DARRAY_SIZE(_arr_p, _type) ((_arr_p)->size / (sizeof(_type)))
+
 
 struct darray{
     uint8_t *arr;
@@ -30,7 +38,7 @@ static inline void darray_free(struct darray *dst){
     dst->cap = 0;
 }
 
-static inline size_t darray_size_for(size_t x){
+static inline size_t darray_ensure(size_t x){
     size_t i; 
     for(i = 1; i <= x; i*=2);
     return i;
@@ -38,7 +46,7 @@ static inline size_t darray_size_for(size_t x){
 
 static inline int darray_change_cap(struct darray *dst, size_t size){
     //size_t cap = darray_size_for(dst->cap >= size ? dst->cap : size);
-    size_t cap = darray_size_for(size);
+    size_t cap = darray_ensure(size);
     void *tmp = NULL;
     if(cap != dst->cap)
         tmp = realloc(dst->arr, cap);
@@ -52,36 +60,32 @@ static inline int darray_change_cap(struct darray *dst, size_t size){
     return 0;
 }
 
-static inline int darray_append(struct darray *dst, void *src, size_t num, size_t elem_size){
-    if(darray_change_cap(dst, dst->size + num*elem_size)){
-        memmove(&dst->arr[dst->size], src, num);
-        dst->size += num*elem_size;
+static inline int darray_append(struct darray *dst, void *src, size_t size){
+    if(darray_change_cap(dst, dst->size + size)){
+        memmove(&dst->arr[dst->size], src, size);
+        dst->size += size;
         return 1;
     }
     return 0;
 }
 
-static inline void *darray_at(struct darray *src, uint index, size_t elem_size){
-    return &src->arr[index*elem_size];
+static inline void *darray_at(struct darray *src, uint index){
+    return &src->arr[index];
 }
 
-static inline uint darray_size(struct darray *src, size_t elem_size){
-    return src->size / elem_size ;
-}
-
-static inline int darray_insert(struct darray *dst, void *src, size_t num, uint index, size_t elem_size){
-    if(darray_change_cap(dst, dst->size + num*elem_size)){
-        memmove(&dst->arr[(index+num)*elem_size], &dst->arr[index*elem_size], dst->size - (index)*elem_size);
-        memmove(&dst->arr[(index)*elem_size], src, num*elem_size);
-        dst->size += num*elem_size;
+static inline int darray_insert(struct darray *dst, void *src, size_t size, uint index){
+    if(darray_change_cap(dst, dst->size + size)){
+        memmove(&dst->arr[size+index], &dst->arr[index], dst->size - index);
+        memmove(&dst->arr[index], src, size);
+        dst->size += size;
         return 1;
     }
     return 0;
 }
 
-static inline int darray_remove(struct darray *dst, size_t num, uint index, size_t elem_size){
-    memmove(&dst->arr[(index*elem_size)], &dst->arr[(index+num)*elem_size], dst->size - (index*elem_size));
-    dst->size -= num*elem_size;
+static inline int darray_remove(struct darray *dst, size_t size, uint index){
+    memmove(&dst->arr[index], &dst->arr[index+size], size);
+    dst->size -= size;
     if(darray_change_cap(dst, dst->size)){
         return 1;
     }
