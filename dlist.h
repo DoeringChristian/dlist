@@ -428,7 +428,7 @@ static inline struct dlist *dlist_push_before(struct dlist *dst, struct dlist *s
  * @return returns self if succes, NULL else
  */
 static inline struct dlist *dlist_push_back(struct dlist *self, struct dlist *src){
-    return dlist_push_after(self->next, src);
+    return dlist_push_after(self->prev, src);
 }
 
 /*
@@ -439,7 +439,7 @@ static inline struct dlist *dlist_push_back(struct dlist *self, struct dlist *sr
  * @return returns self if succes, NULL else
  */
 static inline struct dlist *dlist_push_front(struct dlist *self, struct dlist *src){
-    return dlist_push_before(self->prev, src);
+    return dlist_push_before(self->next, src);
 }
 
 /*
