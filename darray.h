@@ -28,12 +28,16 @@ SOFTWARE.
 typedef unsigned int uint;
 
 #define DARRAY_APPEND(_arr_p, _elem_p) darray_append((_arr_p), (_elem_p), sizeof(*(_elem_p)))
+#define DARRAY_APPEND_ARR(_arr_p, _src_p, _size) darray_append((_arr_p), (_src_p), sizeof(*(_src_p)) * (_size))
 
 #define DARRAY_INSERT(_arr_p, _elem_p, _index) darray_insert((_arr_p), (_elem_p), sizeof(*(_elem_p)), (_index)*(sizeof(*(_elem_p))))
+#define DARRAY_INSERT_ARR(_arr_p, _src_p, _size, _index) darray_insert((_arr_p), (_src_p), sizeof(*(_src_p)), (_index)*(sizeof(*(_src_p))))
 
-#define DARRAY_AT(_arr_p, _type, _index) (_type *)(&(_arr_p)->arr[(_index)*sizeof(_type)])
+#define DARRAY_AT(_arr_p, _type, _index) (*(_type *)(&(_arr_p)->arr[(_index)*sizeof(_type)]))
+#define DARRAY_ARR(_arr_p) ((void *)(_arr_p)->arr)
 
 #define DARRAY_REMOVE(_arr_p, _type, _index) darray_remove(_arr_p, (sizeof(_type)), (_index)*(sizeof(_type)))
+#define DARRAY_REMOVE_ARR(_arr_p, _type, _num, _index) darray_remove(_arr_p, (sizeof(_type)*_num), (_index)*sizeof(_type))
 
 #define DARRAY_SIZE(_arr_p, _type) ((_arr_p)->size / (sizeof(_type)))
 
@@ -57,7 +61,7 @@ static inline void darray_free(struct darray *dst){
     dst->cap = 0;
 }
 
-static inline size_t darray_ensure(size_t x){
+static inline size_t darray_size_for(size_t x){
     size_t i; 
     for(i = 1; i <= x; i*=2);
     return i;
@@ -65,7 +69,7 @@ static inline size_t darray_ensure(size_t x){
 
 static inline int darray_change_cap(struct darray *dst, size_t size){
     //size_t cap = darray_size_for(dst->cap >= size ? dst->cap : size);
-    size_t cap = darray_ensure(size);
+    size_t cap = darray_size_for(size);
     void *tmp = NULL;
     if(cap != dst->cap)
         tmp = realloc(dst->arr, cap);
