@@ -61,7 +61,7 @@ static inline void darray_free(struct darray *dst){
     dst->cap = 0;
 }
 
-static inline size_t darray_size_for(size_t x){
+static inline size_t darray_ciellog2(size_t x){
     size_t i; 
     for(i = 1; i <= x; i*=2);
     return i;
@@ -69,7 +69,7 @@ static inline size_t darray_size_for(size_t x){
 
 static inline int darray_change_cap(struct darray *dst, size_t size){
     //size_t cap = darray_size_for(dst->cap >= size ? dst->cap : size);
-    size_t cap = darray_size_for(size);
+    size_t cap = darray_ciellog2(size);
     void *tmp = NULL;
     if(cap != dst->cap)
         tmp = realloc(dst->arr, cap);
