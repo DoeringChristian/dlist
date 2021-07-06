@@ -155,7 +155,7 @@ static inline int mdarray_append(void **dst, void *src, size_t src_size){
 
 static inline int mdarray_remove(void **dst, size_t size, size_t index){
     struct mdarray_header *header = MDARRAY_HEADER(*dst);
-    memmove(*dst+index, *dst+index+size, header->size-index);
+    memmove(((uint8_t *)*dst)+index, ((uint8_t *)*dst)+index+size, header->size-index);
     header->size -= size;
     size_t cap = mdarray_ciellog2(header->size-size);
     if(cap != header->cap)
