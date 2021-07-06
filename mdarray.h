@@ -135,6 +135,9 @@ static inline size_t mdarray_ciellog2(size_t x){
 
 static inline int mdarray_insert(void **dst, void *src, size_t src_size, size_t index){
     struct mdarray_header *header = MDARRAY_HEADER(*dst);
+    size_t target_size = src_size;
+    if(index > header->size)
+        target_size = index;
     size_t cap = mdarray_ciellog2(header->size+src_size);
     if(cap != header->cap)
         header = realloc(header, sizeof(struct mdarray_header)+cap);
@@ -155,6 +158,8 @@ static inline int mdarray_append(void **dst, void *src, size_t src_size){
 
 static inline int mdarray_remove(void **dst, size_t size, size_t index){
     struct mdarray_header *header = MDARRAY_HEADER(*dst);
+    if(index+size >= header->size)
+        return 0;
     memmove(((uint8_t *)*dst)+index, ((uint8_t *)*dst)+index+size, header->size-index);
     header->size -= size;
     size_t cap = mdarray_ciellog2(header->size-size);
