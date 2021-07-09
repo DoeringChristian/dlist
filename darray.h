@@ -82,14 +82,14 @@ SOFTWARE.
 /*
  * Definitions of realloc, malloc, free for darray (can be changed to custom allocator)
  */
-#define _DARRAY_REALLOC(_void_p, _size) realloc(_void_p, _size)
-#define _DARRAY_MALLOC(_void_p) malloc(_void_p)
-#define _DARRAY_FREE(_void_p) free(_void_p)
+#define DARRAY_REALLOC(_void_p, _size) realloc(_void_p, _size)
+#define DARRAY_MALLOC(_void_p) malloc(_void_p)
+#define DARRAY_FREE(_void_p) free(_void_p)
 
 /*
  * Growth factor of the darray (not yet tested)
  */
-#define _DARRAY_GROWTH_FACTOR 2
+#define DARRAY_GROWTH_FACTOR 2
 
 /*
  * Header structure of darray keeps track of the size and cap.
@@ -110,7 +110,7 @@ struct darray_header{
 /*
  * Internal macro to get the head of an darray.
  */
-#define _DARRAY_HEADER(_arr) ((struct darray_header *)(((uint8_t *)(_arr)) - (sizeof(struct darray_header))))
+#define DARRAY_HEADER(_arr) ((struct darray_header *)(((uint8_t *)(_arr)) - (sizeof(struct darray_header))))
 
 /*
  * Macro for defining a darray as a pointer
@@ -216,16 +216,16 @@ struct darray_header{
  *
  * @return size_t: size of the array as in count of _elem
  */
-#define darray_size(_arr_p) (_DARRAY_HEADER(*(_arr_p))->size /sizeof(**(_arr_p)))
+#define darray_size(_arr_p) (DARRAY_HEADER(*(_arr_p))->size /sizeof(**(_arr_p)))
 
 static inline size_t _darray_ciellog2(size_t x){
     size_t i; 
-    for(i = 1; i <= x; i*=_DARRAY_GROWTH_FACTOR);
+    for(i = 1; i <= x; i*=DARRAY_GROWTH_FACTOR);
     return i;
 }
 
 static inline struct darray_header *_darray_init(void **dst){
-    struct darray_header *header = _DARRAY_MALLOC(sizeof(struct darray_header));
+    struct darray_header *header = DARRAY_MALLOC(sizeof(struct darray_header));
     header->size = 0;
     header->cap = 0;
     *dst = (void *)&header[1];
@@ -233,13 +233,13 @@ static inline struct darray_header *_darray_init(void **dst){
 }
 
 static inline int _darray_insert(void **dst, void *src, size_t src_size, size_t index){
-    struct darray_header *header = _DARRAY_HEADER(*dst);
+    struct darray_header *header = DARRAY_HEADER(*dst);
     size_t target_size = header->size;
     if(index > header->size)
         target_size = index;
     size_t cap = _darray_ciellog2(target_size+src_size);
     if(cap != header->cap)
-        header = _DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
+        header = DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
     if(header != NULL){
         header->cap = cap;
         *dst = (void *)&header[1];
@@ -253,14 +253,14 @@ static inline int _darray_insert(void **dst, void *src, size_t src_size, size_t 
 
 
 static inline int _darray_remove(void **dst, size_t size, size_t index){
-    struct darray_header *header = _DARRAY_HEADER(*dst);
+    struct darray_header *header = DARRAY_HEADER(*dst);
     if(index+size > header->size)
         return 0;
     memmove(((uint8_t *)*dst)+index, ((uint8_t *)*dst)+index+size, header->size-index);
     header->size -= size;
     size_t cap = _darray_ciellog2(header->size-size);
     if(cap != header->cap)
-        header = _DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
+        header = DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
     if(header != NULL){
         header->cap = cap;
         *dst = (void *)&header[1];
@@ -270,7 +270,7 @@ static inline int _darray_remove(void **dst, size_t size, size_t index){
 }
 
 static inline void *_darray_pop_back(void **dst, size_t size){
-    struct darray_header *header = _DARRAY_HEADER(*dst);
+    struct darray_header *header = DARRAY_HEADER(*dst);
     void *ret = ((uint8_t *)*dst)+header->size-size;
     if(!_darray_remove(dst, size, header->size-size)){
         ret = NULL;
@@ -280,8 +280,8 @@ static inline void *_darray_pop_back(void **dst, size_t size){
 
 
 void _darray_free(void **dst){
-    struct darray_header *header = _DARRAY_HEADER(*dst);
-    _DARRAY_FREE(header);
+    struct darray_header *header = DARRAY_HEADER(*dst);
+    DARRAY_FREE(header);
     *dst = NULL;
 }
 
