@@ -93,9 +93,18 @@ SOFTWARE.
 
 /*
  * Header structure of darray keeps track of the size and cap.
+ *
+ * @param align: uintmax_t for guarantueeing allignment of header[1] if sizeof(size_t) < sizeof(uintmax_t)
+ * @param size: Stores the size of the darray
+ * @param cap: Stores curent maximum capacity.
  */
 struct darray_header{
-    size_t size, cap;
+    union{
+        uintmax_t align;
+        struct{
+            size_t size, cap;
+        };
+    };
 };
 
 /*
