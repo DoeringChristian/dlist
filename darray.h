@@ -138,10 +138,11 @@ struct darray_header{
  * This macro has to be called before using a darray since it allocates the memory for the header.
  *
  * @param _arr_p: pointer to the array which shall be initialized.
+ * @param _cap:   initial capacity.
  *
  * @return pointer to the header of the array (NULL if failed)
  */
-#define darray_init(_arr_p) _darray_init((void **)(_arr_p))
+#define darray_init(_arr_p, _cap) _darray_init((void **)(_arr_p), (_cap) * sizeof(**(_arr_p)))
 
 /*
  * Pushes an _elem to the back of the darray. 
@@ -239,10 +240,12 @@ static inline size_t _darray_ciellog2(size_t x){
     return i;
 }
 
-static inline struct darray_header *_darray_init(void **dst){
-    struct darray_header *header = (struct darray_header *)DARRAY_MALLOC(sizeof(struct darray_header));
+static inline struct darray_header *_darray_init(void **dst, size_t cap){
+    struct darray_header *header = NULL;
+    if((header = (struct darray_header *)DARRAY_MALLOC(sizeof(struct darray_header) + cap)) == NULL)
+        return NULL;
     header->size = 0;
-    header->cap = 0;
+    header->cap = cap;
     *dst = (void *)&header[1];
     return header;
 }
