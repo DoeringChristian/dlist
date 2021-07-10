@@ -225,7 +225,7 @@ static inline size_t _darray_ciellog2(size_t x){
 }
 
 static inline struct darray_header *_darray_init(void **dst){
-    struct darray_header *header = DARRAY_MALLOC(sizeof(struct darray_header));
+    struct darray_header *header = (struct darray_header *)DARRAY_MALLOC(sizeof(struct darray_header));
     header->size = 0;
     header->cap = 0;
     *dst = (void *)&header[1];
@@ -282,7 +282,7 @@ static inline int _darray_insert(void **dst, void *src, size_t src_size, size_t 
     size_t cap = _darray_ciellog2(target_size+src_size);
     // since header is a temporary pointer it should be ok to overwrite it with realloc.
     if(cap != header->cap)
-        header = DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
+        header = (struct darray_header *)DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
     if(header != NULL){
         // either cap was equal to header->cap therefore header is still the same and not NULL
         // or we sucessfully allocated new memory.
@@ -313,7 +313,7 @@ static inline int _darray_remove(void **dst, size_t size, size_t index){
     header->size -= size;
     size_t cap = _darray_ciellog2(header->size-size);
     if(cap != header->cap)
-        header = DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
+        header = (struct darray_header *)DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
     if(header != NULL){
         header->cap = cap;
         *dst = (void *)&header[1];
@@ -332,7 +332,7 @@ static inline void *_darray_pop_back(void **dst, size_t size){
 }
 
 
-void _darray_free(void **dst){
+static inline void _darray_free(void **dst){
     struct darray_header *header = DARRAY_HEADER(*dst);
     DARRAY_FREE(header);
     *dst = NULL;
