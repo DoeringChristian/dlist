@@ -232,26 +232,79 @@ static inline struct darray_header *_darray_init(void **dst){
     return header;
 }
 
+/*
+ * Function to insert from src of size src_size in dst at index.
+ *
+ * +--------------+-------------+
+ * | before index | after index |
+ * +--------------+-------------+
+ *                 ^
+ *                 |
+ *             index
+ * 
+ * +--------------+-----+-------------+
+ * | before index | src | after index |
+ * +--------------+-----+-------------+
+ *                 ^
+ *                 |
+ *             index
+ *
+ * One problem with the current strategy is that if you want to insert and
+ * realloc can't increace the current block it copies the content. If the then
+ * the dynarray_insert function copies the "after index" block again leading to
+ * worse performance.
+ *
+ * +--------------+-------------+
+ * | before index | after index |
+ * +--------------+-------------+
+ *  |  realloc copies the block to another memory location.
+ *  v
+ * +--------------+-------------+------------+
+ * | before index | after index | free space |
+ * +--------------+-------------+------------+
+ *                 |
+ *                 +-----+ "after index" is copied again to make room for "src". 
+ *                       | 
+ *                       v
+ * +--------------+-----+-------------+------------+
+ * | before index | src | after index | free space |
+ * +--------------+-----+-------------+------------+
+ *
+ * If we could know weather realloc copies the block or just expands it we
+ * could then copy "after index" directly to the correct position.
+ * 
+ */
 static inline int _darray_insert(void **dst, void *src, size_t src_size, size_t index){
     struct darray_header *header = DARRAY_HEADER(*dst);
     size_t target_size = header->size;
     if(index > header->size)
         target_size = index;
     size_t cap = _darray_ciellog2(target_size+src_size);
+    // since header is a temporary pointer it should be ok to overwrite it with realloc.
     if(cap != header->cap)
         header = DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
     if(header != NULL){
+        // either cap was equal to header->cap therefore header is still the same and not NULL
+        // or we sucessfully allocated new memory.
         header->cap = cap;
         *dst = (void *)&header[1];
+        //set memory to zero if index > header->size
+        memset(((uint8_t *)*dst)+header->size, 0, target_size-header->size);
         memmove(((uint8_t *)*dst)+src_size+index, ((uint8_t *)*dst)+index, target_size-index);
         memmove(((uint8_t *)*dst)+index, src, src_size);
         header->size = target_size+src_size;
         return 1;
     }
+    // header is only NULL if the realloc function failed to allocate more memory.
+    // *dst has not been changed in that case so it is safe to just exit.
     return 0;
 }
 
 
+/*
+ *
+ * remove should not be able to fail even if realloc fails.
+ */
 static inline int _darray_remove(void **dst, size_t size, size_t index){
     struct darray_header *header = DARRAY_HEADER(*dst);
     if(index+size > header->size)
