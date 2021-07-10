@@ -76,6 +76,7 @@ SOFTWARE.
  *   }
  *   darray_free(&test);
  *   return 0;
+ *
  */
 
 
@@ -90,6 +91,20 @@ SOFTWARE.
  * Growth factor of the darray (not yet tested)
  */
 #define DARRAY_GROWTH_FACTOR 2
+
+/*
+ * Defines how much smaller the calculated capacity has to be to 
+ * shrink the array than the current one.
+ * darray shrinks when cap < header->cap / DARRAY_SHRINK_FACTOR 
+ *
+ * example: DARRAY_SHRINK_FACTOR = 2, header->size = 36, header->cap = 128, size = 4
+ *          darray shrinks when cap < header->cap / DARRAY_SHRINK_FACTOR 
+ *          cap = _darray_ciellog2(header->size - size) = 32
+ *          => array shrinks.
+ *
+ *          (array shrinks when cap is smaller than 1/(DARRAY_SHRINK_FACTOR * 2) of header->cap)
+ */
+#define DARRAY_SHRINK_FACTOR 2
 
 /*
  * Header structure of darray keeps track of the size and cap.
@@ -233,7 +248,7 @@ static inline struct darray_header *_darray_init(void **dst){
 }
 
 /*
- * Function to insert from src of size src_size in dst at index.
+ * _darray_insert function:
  *
  * +--------------+-------------+
  * | before index | after index |
@@ -272,32 +287,37 @@ static inline struct darray_header *_darray_init(void **dst){
  *
  * If we could know weather realloc copies the block or just expands it we
  * could then copy "after index" directly to the correct position.
- * 
+ */
+
+/*
+ * Function to insert from src of size src_size in dst at index.
+ *
  */
 static inline int _darray_insert(void **dst, void *src, size_t src_size, size_t index){
     struct darray_header *header = DARRAY_HEADER(*dst);
+
     size_t target_size = header->size;
     if(index > header->size)
         target_size = index;
+
     size_t cap = _darray_ciellog2(target_size+src_size);
     // since header is a temporary pointer it should be ok to overwrite it with realloc.
-    if(cap != header->cap)
-        header = (struct darray_header *)DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
-    if(header != NULL){
-        // either cap was equal to header->cap therefore header is still the same and not NULL
-        // or we sucessfully allocated new memory.
+    if(cap > header->cap){
+        if((header = (struct darray_header *)DARRAY_REALLOC(header, sizeof(struct darray_header)+cap)) == NULL)
+            return 0;
         header->cap = cap;
         *dst = (void *)&header[1];
-        //set memory to zero if index > header->size
-        memset(((uint8_t *)*dst)+header->size, 0, target_size-header->size);
-        memmove(((uint8_t *)*dst)+src_size+index, ((uint8_t *)*dst)+index, target_size-index);
-        memmove(((uint8_t *)*dst)+index, src, src_size);
-        header->size = target_size+src_size;
-        return 1;
     }
-    // header is only NULL if the realloc function failed to allocate more memory.
-    // *dst has not been changed in that case so it is safe to just exit.
-    return 0;
+    // either cap was les or equal to header->cap therefore header is still the same and not NULL
+    // or we sucessfully allocated new memory.
+    // or we didn't and returned.
+
+    // set memory to zero if index > header->size
+    memset(((uint8_t *)*dst)+header->size, 0, target_size-header->size);
+    memmove(((uint8_t *)*dst)+src_size+index, ((uint8_t *)*dst)+index, target_size-index);
+    memmove(((uint8_t *)*dst)+index, src, src_size);
+    header->size = target_size+src_size;
+    return 1;
 }
 
 
@@ -312,12 +332,12 @@ static inline int _darray_remove(void **dst, size_t size, size_t index){
     memmove(((uint8_t *)*dst)+index, ((uint8_t *)*dst)+index+size, header->size-index);
     header->size -= size;
     size_t cap = _darray_ciellog2(header->size-size);
-    if(cap != header->cap)
-        header = (struct darray_header *)DARRAY_REALLOC(header, sizeof(struct darray_header)+cap);
-    if(header != NULL){
+    // Devided the header-size by DARRAY_SHRINK_FACTOR for histeresis.
+    if(cap < header->cap / DARRAY_SHRINK_FACTOR){
+        if((header = (struct darray_header *)DARRAY_REALLOC(header, sizeof(struct darray_header)+cap)) == NULL)
+            return 1;
         header->cap = cap;
         *dst = (void *)&header[1];
-        return 1;
     }
     return 1;
 }
