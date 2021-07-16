@@ -152,7 +152,8 @@ struct darray_header{
  *
  * @return int: 1 if succes, 0 if failed
  */
-#define darray_push_back(_arr_p, _elem_p) darray_insert(_arr_p, _elem_p, darray_size((_arr_p)))
+#define darray_push_back(_arr_p, _elem_p) darray_push(_arr_p, _elem_p, darray_size((_arr_p)))
+
 
 /*
  * Appends an array of _elem to the back of the array.
@@ -164,7 +165,7 @@ struct darray_header{
  * @return int: 1 if succes, 0 if failed
  */
 
-#define darray_append(_arr_p, _elem_p, _num) darray_insert_arr(_arr_p, _elem_p, _num, darray_size((_arr_p)))
+#define darray_append(_arr_p, _elem_p, _num) darray_insert(_arr_p, _elem_p, _num, darray_size((_arr_p)))
 
 /*
  * Inserts an _elem into the darray at _index.
@@ -179,7 +180,7 @@ struct darray_header{
  *
  * @return int: 1 if succes, 0 if failed
  */
-#define darray_insert(_arr_p, _elem_p, _index) _darray_insert((void **)(_arr_p), _elem_p, sizeof(*(_elem_p)), (_index)*(sizeof(**(_arr_p))))
+#define darray_push(_arr_p, _elem_p, _index) _darray_insert((void **)(_arr_p), _elem_p, sizeof(*(_elem_p)), (_index)*(sizeof(**(_arr_p))))
 
 /*
  * Inserts an array of _elem into the darray at _index.
@@ -194,7 +195,7 @@ struct darray_header{
  *
  * @return int: 1 if succes, 0 if failed
  */
-#define darray_insert_arr(_arr_p, _elem_p, _num, _index) _darray_insert((void **)(_arr_p), _elem_p, sizeof(*(_elem_p))*(_num), (_index)*(sizeof(**(_arr_p))))
+#define darray_insert(_arr_p, _elem_p, _num, _index) _darray_insert((void **)(_arr_p), _elem_p, sizeof(*(_elem_p))*(_num), (_index)*(sizeof(**(_arr_p))))
 
 /*
  * Removes an element from the darray.
@@ -207,7 +208,21 @@ struct darray_header{
  *
  * @return int: 1 if succes, 0 if failed
  */
-#define darray_remove(_arr_p, _index) _darray_remove((void **)(_arr_p), sizeof(**(_arr_p)), (_index)*sizeof(**(_arr_p)))
+#define darray_pop(_arr_p, _index) _darray_remove((void **)(_arr_p), sizeof(**(_arr_p)), (_index)*sizeof(**(_arr_p)))
+
+/*
+ * Removes _num elements from the darray
+ *
+ * Further elements after _index are moved to the left to close the hole.
+ * Elements that are after the end of the darray can not be removed.
+ *
+ * @param _arr_p: Pointer to the darray.
+ * @param _num: Number of elements to remove.
+ * @param _index: Index at which position the element should be removed.
+ *
+ * @return int: 1 if succes, 0 if failed
+ */
+#define darray_remove(_arr_p, _num, _index) _darray_remove((void **)(_arr_p), sizeof(**(_arr_p)) * (_num), (_index)*sizeof(**(_arr_p)))
 
 /*
  * Pops the laste element in the darray.
@@ -216,7 +231,7 @@ struct darray_header{
  *
  * @return int: 1 if succes, 0 if failed
  */
-#define darray_pop_back(_arr_p) darray_remove(_arr_p, darray_size(_arr_p)-1)
+#define darray_pop_back(_arr_p) darray_pop(_arr_p, darray_size(_arr_p)-1)
 
 /*
  * Frees the content of array and sets its pointer to 0.
@@ -332,9 +347,9 @@ static inline int _darray_remove(void **dst, size_t size, size_t index){
     struct darray_header *header = DARRAY_HEADER(*dst);
     if(index+size > header->size)
         return 0;
-    memmove(((uint8_t *)*dst)+index, ((uint8_t *)*dst)+index+size, header->size-index);
+    memmove(((uint8_t *)*dst)+index, ((uint8_t *)*dst)+index+size, header->size-(index + size));
     header->size -= size;
-    size_t cap = _darray_ciellog2(header->size-size);
+    size_t cap = _darray_ciellog2(header->size);
     // Devided the header-size by DARRAY_SHRINK_FACTOR for histeresis.
     if(cap < header->cap / DARRAY_SHRINK_FACTOR){
         if((header = (struct darray_header *)DARRAY_REALLOC(header, sizeof(struct darray_header)+cap)) == NULL)
