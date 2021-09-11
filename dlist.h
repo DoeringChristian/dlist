@@ -16,10 +16,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+/*
+ * Dlist is a cyclic doubly linked list. An empty list is a node where the last
+ * and first pointer link to itself.
+ */
+
 #ifndef DLIST_H
 #define DLIST_H
 
 #include <stddef.h>
+
+#ifndef NULL
+#define NULL ((void *)0)
+#endif
+
+#ifndef container_of
+#define container_of(_ptr, _type, _member) ((_type *)((char*)(_ptr)-(char*)(&((_type*)0)->_member)))
+#endif
 
 /*
  * Iterate over the list.
@@ -185,7 +199,7 @@ static inline struct dlist *dlist_push_front(struct dlist *self, struct dlist *s
 }
 
 /*
- * dlist_splice_after inserts the nodes of src after the dst node
+ * dlist_splice_after inserts the nodes of src after the dst node. Src will be empty.
  *
  * @param dst node after which to insert the nodes of src
  * @param src list, whichs nodes are to be inserted after dst
