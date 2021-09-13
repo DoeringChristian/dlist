@@ -32,8 +32,14 @@ SOFTWARE.
 #define slist_foreach(_list_p, _iter)\
     for(struct slist *_iter = (_list_p)->next; (_iter) != NULL; (_iter) = (_iter)->next)
 
-#define slist_foreach_ext(_list_p, _iter)\
-    for((_iter) = (_list_p)->next; (_iter) != NULL; (_iter) = (_iter)->next)
+#define slist_foreach_ext(_list_p, _iter_p)\
+    for((_iter_p) = (_list_p)->next; (_iter_p) != NULL; (_iter_p) = (_iter_p)->next)
+
+#define slist_popeach(_list_p, _iter)\
+    for(struct slist *_iter = slist_pop_after(_list_p);_iter != NULL && _iter = slist_pop_after(_list_p))
+
+#define slist_popeach_ext(_list_p, _iter_p)\
+    for((_iter_p) = slist_pop_after(_list_p);(_iter_p) != NULL && (_iter_p) = slist_pop_after(_list_p))
 
 struct slist{
     struct slist *next;
