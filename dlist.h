@@ -45,6 +45,15 @@ SOFTWARE.
     for(struct dlist *_iter = (_list_p)->next; (_iter) != (_list_p); (_iter) = (_iter)->next)
 
 /*
+ * Iterate over the list with external pointer.
+ *
+ * @param _list_p: pointer to the list to iterate over
+ * @param _iter_p: iterator pointer.
+ */
+#define dlist_foreach_ext(_list_p, _iter_p)\
+    for((_iter_p) = (_list_p)->next; (_iter_p) != (_list_p); (_iter_p) = (_iter_p)->next)
+
+/*
  * Iterate over the list in reverse.
  *
  * @param _list_p: pointer to the list to iterate over
@@ -52,6 +61,15 @@ SOFTWARE.
  */
 #define dlist_foreach_reverse(_list_p, _iter)\
     for(struct dlist *_iter = (_list_p)->prev; (_iter) != (_list_p); (_iter) = (_iter)->prev)
+
+/*
+ * Iterate over the list in reverse with external pointer.
+ *
+ * @param _list_p: pointer to the list to iterate over
+ * @param _iter_p: iterator pointer.
+ */
+#define dlist_foreach_ext(_list_p, _iter_p)\
+    for((_iter_p) = (_list_p)->next; (_iter_p) != (_list_p); (_iter_p) = (_iter_p)->next)
 
 /*
  * Iterate over the list and pop each element.
@@ -63,6 +81,15 @@ SOFTWARE.
     for(struct dlist *(_iter) = dlist_pop((_list_p)->next); (_iter) != (_list_p); (_iter) = dlist_pop((_list_p)->next))
 
 /*
+ * Iterate over the list and pop each element with external pointer.
+ *
+ * @param _list_p: pointer to the list to iterate over
+ * @param _iter_p: iterator pointer.
+ */
+#define dlist_popeach_ext(_list_p, _iter_p)\
+    for((_iter_p) = dlist_pop((_list_p)->next); (_iter_p) != (_list_p); (_iter_p) = dlist_pop((_list_p)->next))
+
+/*
  * Iterate over the list in reverse and pop each element.
  *
  * @param _list_p: pointer to the list to iterate over
@@ -70,6 +97,15 @@ SOFTWARE.
  */
 #define dlist_popeach_reverse(_list_p, _iter)\
     for(struct dlist *(_iter) = dlist_pop((_list_p)->prev); (_iter) != (_list_p); (_iter) = dlist_pop((_list_p)->prev))
+
+/*
+ * Iterate over the list in reverse and pop each element with external pointer.
+ *
+ * @param _list_p: pointer to the list to iterate over
+ * @param _iter_p: iterator pointer.
+ */
+#define dlist_popeach_reverse_ext(_list_p, _iter_p)\
+    for((_iter_p) = dlist_pop((_list_p)->prev); (_iter_p) != (_list_p); (_iter_p) = dlist_pop((_list_p)->prev))
 
 /*
  * Iterate over the list and set _iter to be the content.
