@@ -41,97 +41,48 @@ SOFTWARE.
  * @param _list_p: pointer to the list to iterate over
  * @param _iter: name of the iterator
  */
-#define dlist_foreach(_list_p, _iter)\
-    for(struct dlist *_iter = (_list_p)->next; (_iter) != (_list_p); (_iter) = (_iter)->next)
-
-/*
- * Iterate over the list with external pointer.
- *
- * @param _list_p: pointer to the list to iterate over
- * @param _iter_p: iterator pointer.
- */
-#define dlist_foreach_ext(_list_p, _iter_p)\
+#define dlist_foreach(_iter_p, _list_p)\
     for((_iter_p) = (_list_p)->next; (_iter_p) != (_list_p); (_iter_p) = (_iter_p)->next)
 
-/*
- * Iterate over the list in reverse.
- *
- * @param _list_p: pointer to the list to iterate over
- * @param _iter: name of the iterator
- */
-#define dlist_foreach_reverse(_list_p, _iter)\
-    for(struct dlist *_iter = (_list_p)->prev; (_iter) != (_list_p); (_iter) = (_iter)->prev)
+#define dlist_foreach_from(_iter_p, _list_p)\
+    for((_iter_p) = (_iter_p)->next; (_iter_p) != (_list_p); (_iter_p) = (_iter_p)->next)
 
-/*
- * Iterate over the list in reverse with external pointer.
- *
- * @param _list_p: pointer to the list to iterate over
- * @param _iter_p: iterator pointer.
- */
-#define dlist_foreach_ext(_list_p, _iter_p)\
-    for((_iter_p) = (_list_p)->next; (_iter_p) != (_list_p); (_iter_p) = (_iter_p)->next)
+#define dlist_foreach_rev(_iter_p, _list_p)\
+    for((_iter_p) = (_list_p)->prev; (_iter_p) != (_list_p); (_iter_p) = (_iter_p)->prev)
 
-/*
- * Iterate over the list and pop each element.
- *
- * @param _list_p: pointer to the list to iterate over
- * @param _iter: name of the iterator
- */
-#define dlist_popeach(_list_p, _iter)\
-    for(struct dlist *(_iter) = dlist_pop((_list_p)->next); (_iter) != (_list_p); (_iter) = dlist_pop((_list_p)->next))
+#define dlist_foreach_rev_from(_iter_p, _list_p)\
+    for((_iter_p) = (_iter_p)->prev; (_iter_p) != (_list_p); (_iter_p) = (_iter_p)->prev)
 
-/*
- * Iterate over the list and pop each element with external pointer.
- *
- * @param _list_p: pointer to the list to iterate over
- * @param _iter_p: iterator pointer.
- */
-#define dlist_popeach_ext(_list_p, _iter_p)\
-    for((_iter_p) = dlist_pop((_list_p)->next); (_iter_p) != (_list_p); (_iter_p) = dlist_pop((_list_p)->next))
+#define dlist_foreach_safe(_iter_p, _tmp_p, _list_p)\
+    for((_iter_p) = (_list_p)->next, n = (_iter_p)->next; (_iter_p) != (_list_p); (_iter_p) = (_tmp_p), (_tmp_p) = (_iter_p)->next)
 
-/*
- * Iterate over the list in reverse and pop each element.
- *
- * @param _list_p: pointer to the list to iterate over
- * @param _iter: name of the iterator
- */
-#define dlist_popeach_reverse(_list_p, _iter)\
-    for(struct dlist *(_iter) = dlist_pop((_list_p)->prev); (_iter) != (_list_p); (_iter) = dlist_pop((_list_p)->prev))
+#define dlist_foreach_rev_safe(_iter_p, _tmp_p, _list_p)\
+    for((_iter_p) = (_list_p)->prev, n = (_iter_p)->prev; (_iter_p) != (_list_p); (_iter_p) = (_tmp_p), (_tmp_p) = (_iter_p)->prev)
 
-/*
- * Iterate over the list in reverse and pop each element with external pointer.
- *
- * @param _list_p: pointer to the list to iterate over
- * @param _iter_p: iterator pointer.
- */
-#define dlist_popeach_reverse_ext(_list_p, _iter_p)\
-    for((_iter_p) = dlist_pop((_list_p)->prev); (_iter_p) != (_list_p); (_iter_p) = dlist_pop((_list_p)->prev))
+#define dlist_foreach_cont(_iter_p, _list_p, _member)\
+    for((_iter_p) = container_of((_list_p)->next, typeof(*(_iter_p)), _member);\
+        &((_iter_p)->_member) != (_list_p);\
+        (_iter_p) = container_of((_iter_p)->_member.next, typeof(*(_iter_p)), _member))
 
-/*
- * Iterate over the list and set _iter to be the content.
- *
- * @param _list_p: pointer to the list to iterate over.
- * @param _iter_p: pointer to a container used to iterate over the list.
- * @param _iter_node_p: pointer to a struct dlist used to iterate over the list.
- */
-#define dlist_foreach_cont(_list_p, _iter_p, _iter_node_p)\
-    for((_iter_node_p) = (_list_p)->next, (_iter_p) = (void *)(_iter_node_p)->cont; (_iter_node_p) != (_list_p); (_iter_node_p) = (_iter_node_p)->next, (_iter_p) = (void *)(_iter_node_p)->cont)
+#define dlist_foreach_cont_from(_iter_p, _list_p, _member)\
+    for((_iter_p) = container_of((_iter_p)->member.next, typeof(*(_iter_p)), _member);\
+        &((_iter_p)->_member) != (_list_p);\
+        (_iter_p) = container_of((_iter_p)->_member.next, typeof(*(_iter_p)), _member))
 
-/*
- * Iterate over the list in reverse and set _iter to be the content.
- *
- * @param _list_p: pointer to the list to iterate over.
- * @param _iter_p: pointer to a container used to iterate over the list.
- * @param _iter_node_p: pointer to a struct dlist used to iterate over the list.
- */
-#define dlist_foreach_cont_reverse(_list_p, _iter_p, _iter_node_p)\
-    for((_iter_node_p) = (_list_p)->next, (_iter_p) = (void *)(_iter_node_p)->cont; (_iter_node_p) != (_list_p); (_iter_node_p) = (_iter_node_p)->next, (_iter_p) = (void *)(_iter_node_p)->cont)
+#define dlist_foreach_cont_rev(_iter_p, _list_p, _member)\
+    for((_iter_p) = container_of((_list_p)->prev, typeof(*(_iter_p)), _member);\
+        &((_iter_p)->_member) != (_list_p);\
+        (_iter_p) = container_of((_iter_p)->_member.prev, typeof(*(_iter_p)), _member))
+
+#define dlist_foreach_cont_rev_from(_iter_p, _list_p, _member)\
+    for((_iter_p) = container_of((_iter_p)->member.prev, typeof(*(_iter_p)), _member);\
+        &((_iter_p)->_member) != (_list_p);\
+        (_iter_p) = container_of((_iter_p)->_member.prev, typeof(*(_iter_p)), _member))
 
 /*
  * dlist is the node as well as the head of a doubly linked list.
  */
 struct dlist{
-    void *cont;
     struct dlist *next, *prev;
 };
 
@@ -142,8 +93,7 @@ struct dlist{
  * @param cont: pointer to the container struct NULL in case of list_head
  * @return: dst
  */
-static inline struct dlist *dlist_init(struct dlist *dst, void *cont){
-    dst->cont = cont;
+static inline struct dlist *dlist_init(struct dlist *dst){
     dst->next = dst;
     dst->prev = dst;
     return dst;
@@ -156,7 +106,7 @@ static inline struct dlist *dlist_init(struct dlist *dst, void *cont){
  * @return: dst
  */
 static inline struct dlist *dlist_head_init(struct dlist *dst){
-    return dlist_init(dst, NULL);
+    return dlist_init(dst);
 }
 
 /*
@@ -278,7 +228,8 @@ static inline struct dlist *dlist_splice_before(struct dlist *dst, struct dlist 
  */
 static inline size_t dlist_length(struct dlist *self){
     size_t i = 0;
-    dlist_foreach(self, n) i++;
+    struct dlist *n;
+    dlist_foreach(n, self) i++;
     return i;
 }
 
