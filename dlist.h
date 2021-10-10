@@ -35,6 +35,8 @@ SOFTWARE.
 #define container_of(_ptr, _type, _member) ((_type *)((char*)(_ptr)-(char*)(&((_type*)0)->_member)))
 #endif
 
+#define dlist(_list_p) (struct dlist){.next = (_list_p), .prev = (_list_p)}
+
 /*
  * Iterate over the list.
  *
